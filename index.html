@@ -42,9 +42,8 @@
     }
 
     .toggle-panel-btn {
-      margin-top: 5px; /* Subito sotto il logo */
       position: absolute;
-      top: calc(20px + 250px); /* Altezza del logo */
+      margin-top: 70px;
       left: 50%;
       transform: translateX(-50%);
       background: linear-gradient(45deg, #58a6ff, #7f7fff);
@@ -66,7 +65,7 @@
 
     .overlay {
       position: absolute;
-      top: calc(20px + 250px + 60px); /* Logo + pulsante */
+      top: calc(70px + 60px); /* Pannello leggermente più in basso */
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.8);
@@ -104,27 +103,6 @@
       border-radius: 4px;
     }
 
-    .suggestions {
-      position: absolute;
-      width: calc(100% - 22px);
-      background: #2c2c2c;
-      border: 1px solid #333;
-      border-radius: 4px;
-      color: #fff;
-      z-index: 1200;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-
-    .suggestions div {
-      padding: 10px;
-      cursor: pointer;
-    }
-
-    .suggestions div:hover {
-      background: #58a6ff;
-    }
-
     .add-button {
       background: linear-gradient(45deg, #58a6ff, #7f7fff);
       color: #fff;
@@ -137,15 +115,28 @@
     }
 
     .popup-content img {
-      max-width: 80px;
+      max-width: 40px;
       border-radius: 50%;
-      margin-bottom: 10px;
+      margin-right: 5px;
+      vertical-align: middle;
     }
 
     .popup-content a {
       color: #58a6ff;
       text-decoration: none;
       font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .delete-button {
+      background: #ff4d4d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -174,6 +165,7 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     let map;
+    const markers = new Map();
 
     function initMap() {
       map = L.map('map', {
@@ -188,101 +180,86 @@
         noWrap: true
       }).addTo(map);
 
-      // Centrare l'Europa e impostare il blocco dello zoom-out
-      const initialZoom = 3; // Zoom più indietro
-      map.setView([50, 10], initialZoom); // Centrare l'Europa
+      const initialZoom = 3;
+      map.setView([50, 10], initialZoom);
       map.setMinZoom(initialZoom);
 
-      // Aggiungi controlli di zoom
       L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
-      // Carica marker salvati
-      const savedData = loadMarkersFromStorage();
-      savedData.forEach(item => {
-        addMarkerToMap(item);
-      });
+      loadMarkersFromStorage().forEach(item => addMarkerToMap(item));
     }
 
     function loadMarkersFromStorage() {
-      const data = localStorage.getItem('curatorsData');
-      return data ? JSON.parse(data) : [];
+      const storedData = localStorage.getItem('curatorsData');
+      return storedData ? JSON.parse(storedData) : [];
     }
 
-    function saveMarkersToStorage(data) {
-      localStorage.setItem('curatorsData', JSON.stringify(data));
+    function saveMarkersToStorage() {
+      localStorage.setItem('curatorsData', JSON.stringify([...markers.values()].flat()));
     }
 
-    function addMarkerToMap(item) {
-      const marker = L.marker([item.lat, item.lng]).addTo(map);
+    function addMarkerToMap(user) {
+      const key = `${user.lat}-${user.lng}`;
+      if (!markers.has(key)) {
+        const marker = L.marker([user.lat, user.lng]).addTo(map);
 
-      const content = `
-        <div class="popup-content">
-          ${item.image ? `<img src="${item.image}" alt="User Image" /><br>` : ''}
-          <strong>${item.name}</strong><br>
-          <a href="${item.link}" target="_blank">Vai su Spotify</a><br>
-          <em>${item.city}</em>
-        </div>
-      `;
-
-      marker.bindPopup(content);
-
-      // Mostra automaticamente il popup al passaggio del mouse
-      marker.on('mouseover', function () {
-        marker.openPopup();
-      });
-      marker.on('mouseout', function () {
-        marker.closePopup();
-      });
-    }
-
-    async function geocodeCity(city) {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(city)}`;
-      const response = await fetch(url);
-      return await response.json();
-    }
-
-    function handleCityInput(event) {
-      const cityInput = event.target.value;
-      const suggestionsDiv = document.getElementById('citySuggestions');
-
-      if (cityInput.length < 3) {
-        suggestionsDiv.innerHTML = '';
-        return;
-      }
-
-      geocodeCity(cityInput).then(results => {
-        suggestionsDiv.innerHTML = results.map(result => `
-          <div data-lat="${result.lat}" data-lng="${result.lon}">
-            ${result.display_name}
-          </div>
-        `).join('');
-
-        Array.from(suggestionsDiv.children).forEach(child => {
-          child.addEventListener('click', function () {
-            document.getElementById('cityInput').value = this.innerText;
-            suggestionsDiv.innerHTML = '';
-          });
+        marker.bindPopup(() => {
+          const users = markers.get(key)
+            .map(
+              u => `
+                <img src="${u.image}" alt="${u.name}" />
+                <strong>${u.name}</strong>
+                <br><a href="${u.link}" target="_blank">Vai su Spotify</a>
+                <br><button class="delete-button" onclick="deleteUser('${key}', '${u.name}')">Elimina</button>`
+            )
+            .join('<br><br>');
+          return `<div class="popup-content">${users}</div>`;
+        }).on('mouseover', function () {
+          this.openPopup();
+        }).on('mouseout', function (e) {
+          const popup = e.target.getPopup();
+          const popupElement = popup.getElement();
+          if (!popupElement.matches(':hover')) {
+            this.closePopup();
+          }
         });
-      }).catch(err => {
-        console.error(err);
-      });
+
+        markers.set(key, [user]);
+      } else {
+        markers.get(key).push(user);
+      }
+      saveMarkersToStorage();
     }
 
-    document.getElementById('togglePanel').addEventListener('click', function () {
+    function deleteUser(key, name) {
+      const updatedUsers = markers.get(key).filter(user => user.name !== name);
+      if (updatedUsers.length) {
+        markers.set(key, updatedUsers);
+      } else {
+        markers.delete(key);
+        map.eachLayer(layer => {
+          if (layer instanceof L.Marker && layer.getLatLng().toString() === key) {
+            map.removeLayer(layer);
+          }
+        });
+      }
+      saveMarkersToStorage();
+      map.closePopup();
+    }
+
+    document.getElementById('togglePanel').addEventListener('click', () => {
       const panel = document.getElementById('panel');
       const button = document.getElementById('togglePanel');
       panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
       button.textContent = panel.style.display === 'block' ? 'Chiudi' : 'Apri';
     });
 
-    document.getElementById('cityInput').addEventListener('input', handleCityInput);
-
-    document.getElementById('addUserBtn').addEventListener('click', async function () {
+    document.getElementById('addUserBtn').addEventListener('click', async () => {
       const spotifyLink = document.getElementById('spotifyLink').value.trim();
       const city = document.getElementById('cityInput').value.trim();
 
       if (!spotifyLink || !city) {
-        alert("Per favore, inserisci un link Spotify valido e una città.");
+        alert('Inserisci link Spotify e città validi.');
         return;
       }
 
@@ -290,64 +267,56 @@
         const location = await geocodeCity(city);
         const spotifyData = await getSpotifyUserData(spotifyLink);
 
-        const newItem = {
-          lat: location[0].lat,
-          lng: location[0].lon,
+        addMarkerToMap({
+          lat: location.lat,
+          lng: location.lng,
           name: spotifyData.name,
           image: spotifyData.image,
           link: spotifyData.link,
           city: city
-        };
-
-        addMarkerToMap(newItem);
-
-        const savedData = loadMarkersFromStorage();
-        savedData.push(newItem);
-        saveMarkersToStorage(savedData);
+        });
 
         document.getElementById('spotifyLink').value = '';
         document.getElementById('cityInput').value = '';
       } catch (err) {
         console.error(err);
-        alert("Si è verificato un errore: " + err.message);
+        alert(`Errore: ${err.message}`);
       }
     });
 
-    async function getSpotifyUserData(spotifyUrl) {
-      const userId = spotifyUrl.split('/user/')[1]?.split('?')[0];
-      if (!userId) {
-        throw new Error("ID utente non trovato nell'URL");
-      }
+    async function geocodeCity(city) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(city)}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (!data.length) throw new Error('Città non trovata.');
+      return { lat: data[0].lat, lng: data[0].lon };
+    }
 
-      const accessToken = await getAccessToken();
+    async function getSpotifyUserData(url) {
+      const userId = url.split('/user/')[1]?.split('?')[0];
+      if (!userId) throw new Error('ID utente non trovato.');
 
+      const token = await getAccessToken();
       const response = await fetch(`https://api.spotify.com/v1/users/${userId}`, {
-        headers: {
-          'Authorization': 'Bearer ' + accessToken
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-
-      const userData = await response.json();
+      const data = await response.json();
       return {
-        image: (userData.images && userData.images.length > 0) ? userData.images[0].url : '',
-        link: spotifyUrl,
-        name: userData.display_name || userData.id || "Utente Sconosciuto"
+        name: data.display_name || 'Sconosciuto',
+        image: (data.images && data.images.length > 0) ? data.images[0].url : '',
+        link: url
       };
     }
 
     async function getAccessToken() {
-      const CLIENT_ID = "18a4d1ae2b964fcf9ffec187b25d39c8";
-      const CLIENT_SECRET = "a73047b339604974a8dd4094037b8641";
-
       const response = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Basic ' + btoa(CLIENT_ID + ':' + CLIENT_SECRET),
+          Authorization: 'Basic ' + btoa('18a4d1ae2b964fcf9ffec187b25d39c8:a73047b339604974a8dd4094037b8641'),
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: 'grant_type=client_credentials'
       });
-
       const data = await response.json();
       return data.access_token;
     }
