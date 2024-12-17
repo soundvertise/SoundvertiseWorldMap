@@ -26,7 +26,8 @@
     }
 
     .toggle-panel-btn {
-      margin-top: 70px;
+      position: relative;
+      margin-top: 20px;
       background: linear-gradient(45deg, #58a6ff, #7f7fff);
       border: none;
       color: #fff;
@@ -42,7 +43,7 @@
 
     .overlay {
       position: absolute;
-      top: calc(70px + 60px);
+      top: calc(100px);
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.8);
@@ -126,11 +127,17 @@
     }
 
     function addMarkerToMap(user) {
-      const marker = L.marker([user.lat, user.lng]).addTo(map);
-      marker.bindPopup(`
-        <strong>${user.name || 'Curatore'}</strong><br>
-        <a href="${user.link}" target="_blank">Vai su Spotify</a>
-      `);
+      const key = `${user.lat}-${user.lng}`;
+      if (!markers.has(key)) {
+        const marker = L.marker([user.lat, user.lng]).addTo(map);
+        marker.bindPopup(() => {
+          return `<strong>${user.name || 'Curatore'}</strong><br>
+                  <a href="${user.link}" target="_blank">Vai su Spotify</a>`;
+        });
+        markers.set(key, [user]);
+      } else {
+        markers.get(key).push(user);
+      }
     }
 
     document.getElementById('addUserBtn').addEventListener('click', async () => {
@@ -170,10 +177,13 @@
 
     document.getElementById('togglePanel').addEventListener('click', () => {
       const panel = document.getElementById('panel');
+      const button = document.getElementById('togglePanel');
       if (panel.style.display === 'block') {
         panel.style.display = 'none';
+        button.textContent = 'Apri';
       } else {
         panel.style.display = 'block';
+        button.textContent = 'Chiudi';
       }
     });
 
