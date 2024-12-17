@@ -10,7 +10,6 @@
       height: 100%;
       width: 100%;
       margin: 0;
-      padding: 0;
       background: #000;
       font-family: sans-serif;
     }
@@ -20,40 +19,40 @@
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      text-align: center;
       z-index: 1100;
+      text-align: center;
     }
 
     .logo-container img {
       width: 250px;
-      height: auto;
     }
 
     .toggle-panel-btn {
-      margin-top: 20px;
+      display: block;
+      margin: 5px auto 0;
       background: linear-gradient(45deg, #58a6ff, #7f7fff);
-      border: none;
       color: #fff;
+      border: none;
       padding: 10px 20px;
-      cursor: pointer;
       font-weight: bold;
+      cursor: pointer;
       border-radius: 4px;
       text-transform: uppercase;
-      letter-spacing: 1px;
       font-size: 1em;
     }
 
     .overlay {
       position: absolute;
-      top: calc(20px + 310px);
+      top: calc(100px + 50px);
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0,0,0,0.9);
+      color: #fff;
       padding: 20px;
       border-radius: 10px;
-      z-index: 1100;
       width: 400px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      z-index: 1100;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
       display: none;
     }
 
@@ -61,7 +60,7 @@
       width: 100%;
       padding: 10px;
       margin-bottom: 10px;
-      background: #2c2c2c;
+      background: #2c2c3e;
       color: #fff;
       border: none;
       border-radius: 4px;
@@ -70,42 +69,73 @@
     .add-button {
       background: linear-gradient(45deg, #58a6ff, #7f7fff);
       color: #fff;
-      border: none;
       padding: 10px;
-      width: 100%;
+      border: none;
       cursor: pointer;
       font-weight: bold;
       text-transform: uppercase;
+      width: 100%;
+      border-radius: 4px;
+    }
+
+    .popup-user {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .popup-user img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .delete-button {
+      background: #ff4d4d;
+      color: #fff;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+
+    .popup-user a {
+      color: #58a6ff;
+      text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
 
-  <!-- Logo e Pulsante Apri -->
+  <!-- Logo e Pulsante APRI -->
   <div class="logo-container">
     <img src="LOGO WHITE NO BACKGROUND.png" alt="Soundvertise Logo"/>
     <button class="toggle-panel-btn" id="togglePanel">Apri</button>
   </div>
 
-  <!-- Pannello Overlay -->
+  <!-- Pannello Input -->
   <div class="overlay" id="panel">
-    <h2>Curators Map</h2>
+    <h2>Aggiungi Curatore</h2>
     <div class="form-group">
       <input type="text" id="spotifyLink" placeholder="Link Spotify Utente">
     </div>
     <div class="form-group">
       <input type="text" id="cityInput" placeholder="Digita il nome della città">
+      <div id="citySuggestions" class="suggestions"></div>
     </div>
     <button class="add-button" id="addUserBtn">Aggiungi</button>
   </div>
 
-  <!-- Leaflet e Firebase -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database-compat.js"></script>
   <script>
-    // Configurazione Firebase
+    // Firebase Configurazione
     const firebaseConfig = {
       apiKey: "AIzaSyAF1C0aWwy2sU3NQtW5jRFuEhmmxJhAric",
       authDomain: "soundvertise-world-map-7c33a.firebaseapp.com",
@@ -116,60 +146,84 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Inizializza mappa
     const map = L.map('map', {
-      maxBounds: [[-85, -180], [85, 180]],
       minZoom: 3,
-      maxZoom: 18
+      maxZoom: 18,
+      maxBounds: [[-85, -180], [85, 180]],
+      maxBoundsViscosity: 1.0
     }).setView([20, 10], 3);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // Carica i marker dal database
     db.ref('markers').on('value', snapshot => {
-      snapshot.forEach(childSnapshot => {
-        const user = childSnapshot.val();
-        addMarker(user);
+      map.eachLayer(layer => layer instanceof L.Marker && map.removeLayer(layer));
+      const groupedMarkers = {};
+      snapshot.forEach(child => {
+        const user = child.val();
+        const key = `${user.lat},${user.lng}`;
+        if (!groupedMarkers[key]) groupedMarkers[key] = [];
+        groupedMarkers[key].push({ ...user, id: child.key });
       });
-    });
-
-    // Aggiungi un marker alla mappa
-    function addMarker(user) {
-      const marker = L.marker([user.lat, user.lng]).addTo(map);
-      marker.bindPopup(`
-        <img src="${user.image || 'https://via.placeholder.com/40'}" alt="${user.name}" style="border-radius: 50%; width: 40px;">
-        <strong>${user.name}</strong><br>
-        <a href="${user.link}" target="_blank">Vai su Spotify</a>
-      `);
-    }
-
-    // Geocoding città
-    async function geocodeCity(city) {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
-      const data = await response.json();
-      if (!data.length) throw new Error('Città non trovata');
-      return data[0];
-    }
-
-    // Aggiunta utente
-    document.getElementById('addUserBtn').addEventListener('click', async () => {
-      const spotifyLink = document.getElementById('spotifyLink').value;
-      const city = document.getElementById('cityInput').value;
-      if (!spotifyLink || !city) return alert('Inserisci dati validi.');
-
-      try {
-        const location = await geocodeCity(city);
-        const user = { lat: location.lat, lng: location.lon, name: 'Curatore', link: spotifyLink };
-        db.ref('markers').push(user);
-      } catch (error) {
-        alert(error.message);
+      for (const [key, users] of Object.entries(groupedMarkers)) {
+        const [lat, lng] = key.split(',').map(Number);
+        const marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup(users.map(user => generatePopupContent(user)).join('<hr>'));
+        marker.on('mouseover', () => marker.openPopup());
       }
     });
 
-    // Pannello Apri
+    function generatePopupContent(user) {
+      return `
+        <div class="popup-user">
+          <img src="${user.image || 'https://via.placeholder.com/30'}" alt="${user.name}">
+          <a href="${user.link}" target="_blank">${user.name}</a>
+          <button class="delete-button" onclick="deleteUser('${user.id}')">Elimina</button>
+        </div>
+      `;
+    }
+
+    function deleteUser(key) {
+      db.ref('markers/' + key).remove();
+    }
+
+    document.getElementById('addUserBtn').addEventListener('click', async () => {
+      const spotifyLink = document.getElementById('spotifyLink').value.trim();
+      const city = document.getElementById('cityInput').value.trim();
+
+      if (!spotifyLink || !city) return alert("Inserisci dati validi");
+
+      const location = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`)
+        .then(res => res.json()).then(data => data[0]);
+
+      const userId = spotifyLink.split('/user/')[1]?.split('?')[0];
+      const token = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + btoa('18a4d1ae2b964fcf9ffec187b25d39c8:a73047b339604974a8dd4094037b8641'),
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'grant_type=client_credentials'
+      }).then(res => res.json()).then(data => data.access_token);
+
+      const spotifyUser = await fetch(`https://api.spotify.com/v1/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(res => res.json());
+
+      const user = {
+        lat: location.lat,
+        lng: location.lon,
+        name: spotifyUser.display_name || "Curatore",
+        link: spotifyLink,
+        image: (spotifyUser.images?.[0]?.url) || ''
+      };
+
+      db.ref('markers').push(user);
+    });
+
     document.getElementById('togglePanel').addEventListener('click', () => {
       const panel = document.getElementById('panel');
+      const btn = document.getElementById('togglePanel');
       panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+      btn.textContent = panel.style.display === 'block' ? 'Chiudi' : 'Apri';
     });
   </script>
 </body>
