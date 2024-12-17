@@ -1,14 +1,29 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Soundvertise Curators Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    html, body, #map {
+    html, body {
       height: 100%;
+      width: 100%;
       margin: 0;
+      padding: 0;
+      background: #000;
+      font-family: sans-serif;
+      color: #ffffff;
+      overflow: hidden;
+    }
+
+    #map {
+      position: absolute;
+      top: 0; 
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
     }
 
     .logo-container {
@@ -26,8 +41,7 @@
     }
 
     .toggle-panel-btn {
-      position: relative;
-      margin-top: 20px;
+      margin-top: 70px;
       background: linear-gradient(45deg, #58a6ff, #7f7fff);
       border: none;
       color: #fff;
@@ -43,7 +57,7 @@
 
     .overlay {
       position: absolute;
-      top: calc(100px);
+      top: calc(70px + 60px);
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.8);
@@ -57,8 +71,6 @@
       display: none;
     }
   </style>
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <!-- Firebase SDK Compat Version -->
   <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database-compat.js"></script>
@@ -84,8 +96,9 @@
     <button class="add-button" id="addUserBtn">Aggiungi</button>
   </div>
 
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Firebase Configuration
+    // Configurazione Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAF1C0aWwy2sU3NQtW5jRFuEhmmxJhAric",
       authDomain: "soundvertise-world-map-7c33a.firebaseapp.com",
@@ -95,20 +108,15 @@
       messagingSenderId: "578131711549",
       appId: "1:578131711549:web:c65dfad801ced6925ebc54"
     };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let map;
     const markers = new Map();
 
     function initMap() {
-      map = L.map('map').setView([50, 10], 3);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18
-      }).addTo(map);
-
+      map = L.map('map', { noWrap: true }).setView([50, 10], 3);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
       loadMarkersFromDatabase();
     }
 
@@ -122,22 +130,18 @@
     }
 
     function saveMarkerToDatabase(user) {
-      const newMarkerRef = db.ref('markers').push();
-      newMarkerRef.set(user);
+      db.ref('markers').push(user);
     }
 
     function addMarkerToMap(user) {
-      const key = `${user.lat}-${user.lng}`;
-      if (!markers.has(key)) {
-        const marker = L.marker([user.lat, user.lng]).addTo(map);
-        marker.bindPopup(() => {
-          return `<strong>${user.name || 'Curatore'}</strong><br>
-                  <a href="${user.link}" target="_blank">Vai su Spotify</a>`;
-        });
-        markers.set(key, [user]);
-      } else {
-        markers.get(key).push(user);
-      }
+      const marker = L.marker([user.lat, user.lng]).addTo(map);
+      marker.bindPopup(`
+        <div class="popup-content">
+          <img src="${user.image || 'default-avatar.png'}" alt="${user.name}"/>
+          <strong>${user.name}</strong><br>
+          <a href="${user.link}" target="_blank">Vai su Spotify</a>
+        </div>
+      `);
     }
 
     document.getElementById('addUserBtn').addEventListener('click', async () => {
@@ -149,22 +153,17 @@
         return;
       }
 
-      try {
-        const location = await geocodeCity(city);
-        const user = {
-          lat: location[0].lat,
-          lng: location[0].lon,
-          name: "Curatore",
-          link: spotifyLink
-        };
-        saveMarkerToDatabase(user);
-        addMarkerToMap(user);
+      const location = await geocodeCity(city);
+      const user = {
+        lat: location[0].lat,
+        lng: location[0].lon,
+        name: 'Curatore',
+        image: '',
+        link: spotifyLink
+      };
 
-        document.getElementById('spotifyLink').value = '';
-        document.getElementById('cityInput').value = '';
-      } catch (error) {
-        alert('Città non trovata.');
-      }
+      saveMarkerToDatabase(user);
+      addMarkerToMap(user);
     });
 
     async function geocodeCity(city) {
@@ -177,14 +176,7 @@
 
     document.getElementById('togglePanel').addEventListener('click', () => {
       const panel = document.getElementById('panel');
-      const button = document.getElementById('togglePanel');
-      if (panel.style.display === 'block') {
-        panel.style.display = 'none';
-        button.textContent = 'Apri';
-      } else {
-        panel.style.display = 'block';
-        button.textContent = 'Chiudi';
-      }
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     });
 
     window.onload = initMap;
