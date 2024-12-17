@@ -56,9 +56,11 @@
       display: none;
     }
   </style>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Firebase SDK Compat Version -->
+  <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database-compat.js"></script>
 </head>
 <body>
   <div id="map"></div>
@@ -81,7 +83,6 @@
     <button class="add-button" id="addUserBtn">Aggiungi</button>
   </div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     // Firebase Configuration
     const firebaseConfig = {
@@ -89,7 +90,7 @@
       authDomain: "soundvertise-world-map-7c33a.firebaseapp.com",
       databaseURL: "https://soundvertise-world-map-7c33a-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "soundvertise-world-map-7c33a",
-      storageBucket: "soundvertise-world-map-7c33a.firebasestorage.app",
+      storageBucket: "soundvertise-world-map-7c33a.appspot.com",
       messagingSenderId: "578131711549",
       appId: "1:578131711549:web:c65dfad801ced6925ebc54"
     };
@@ -126,7 +127,10 @@
 
     function addMarkerToMap(user) {
       const marker = L.marker([user.lat, user.lng]).addTo(map);
-      marker.bindPopup(`<strong>${user.name}</strong><br><a href="${user.link}" target="_blank">Vai su Spotify</a>`);
+      marker.bindPopup(`
+        <strong>${user.name || 'Curatore'}</strong><br>
+        <a href="${user.link}" target="_blank">Vai su Spotify</a>
+      `);
     }
 
     document.getElementById('addUserBtn').addEventListener('click', async () => {
@@ -163,6 +167,15 @@
       if (!data.length) throw new Error('Città non trovata.');
       return data;
     }
+
+    document.getElementById('togglePanel').addEventListener('click', () => {
+      const panel = document.getElementById('panel');
+      if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+      } else {
+        panel.style.display = 'block';
+      }
+    });
 
     window.onload = initMap;
   </script>
