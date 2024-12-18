@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -416,6 +416,21 @@
       border-radius: 4px;
     }
 
+    /* Personalizzazione dei controlli di zoom nella posizione bottomleft */
+    .leaflet-bottom.leaflet-left .leaflet-control-zoom {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+    }
+
+    .leaflet-control-zoom a {
+      color: #7f7fff; /* Violet */
+      font-weight: bold;
+    }
+
+    .leaflet-control-zoom a:hover {
+      color: #8e2de2; /* Darker Violet */
+    }
+
   </style>
 </head>
 <body>
@@ -446,7 +461,7 @@
     <div class="apri-container">
       <button class="toggle-panel-btn" id="togglePanel">Open</button>
       <div class="overlay" id="panel">
-        <h2>Add Curator</h2>
+        <h2>Aggiungi Curator</h2>
         <div class="form-group">
           <input type="text" id="spotifyLink" placeholder="Spotify User Link">
         </div>
@@ -500,14 +515,22 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Initialize Map
+    // Initialize Map without default zoom controls
     const map = L.map('map', {
+      zoomControl: false, // Disabilita i controlli di zoom predefiniti
       minZoom: 3,
       maxZoom: 18,
       maxBounds: [[-85, -180], [85, 180]],
       maxBoundsViscosity: 1.0
     }).setView([20, 10], 3);
+
+    // Aggiungi il layer della mappa
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    // Aggiungi nuovi controlli di zoom nella posizione inferiore sinistra
+    L.control.zoom({
+      position: 'bottomleft' // Posizione dei controlli di zoom
+    }).addTo(map);
 
     // List of Musical Genres
     const genresList = [
@@ -673,7 +696,7 @@
     // Function to Delete a User
     function deleteUser(key, event) {
       event.stopPropagation(); // Prevents popup from closing
-      if (confirm("Are you sure you want to delete this user?")) {
+      if (confirm("Sei sicuro di voler eliminare questo utente?")) {
         db.ref('markers/' + key).remove();
       }
     }
@@ -751,16 +774,16 @@
                                   .map(btn => btn.getAttribute('data-genre'));
 
       if (!spotifyLink || !city || selectedGenres.length === 0) {
-        return; // Remove alert
+        return; // Rimuovi alert
       }
 
       const location = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`)
         .then(res => res.json()).then(data => data[0]);
 
-      if (!location) return; // Remove alert
+      if (!location) return; // Rimuovi alert
 
       const userId = spotifyLink.split('/user/')[1]?.split('?')[0];
-      if (!userId) return; // Remove alert
+      if (!userId) return; // Rimuovi alert
 
       const token = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
@@ -771,7 +794,7 @@
         body: 'grant_type=client_credentials'
       }).then(res => res.json()).then(data => data.access_token);
 
-      if (!token) return; // Remove alert
+      if (!token) return; // Rimuovi alert
 
       const spotifyUser = await fetch(`https://api.spotify.com/v1/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -791,10 +814,10 @@
         document.getElementById('spotifyLink').value = '';
         document.getElementById('cityInput').value = '';
         document.querySelectorAll('#addGenreButtons .genre-button').forEach(btn => btn.classList.remove('selected'));
-        // Optionally, you can display a success message here
+        // Optionally, puoi visualizzare un messaggio di successo qui
       }).catch(err => {
         console.error(err);
-        // Optionally, handle the error here
+        // Optionally, gestisci l'errore qui
       });
     });
 
