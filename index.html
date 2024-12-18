@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -11,9 +11,94 @@
       width: 100%;
       margin: 0;
       background: #000;
-      font-family: sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+    /* Genre Filter Container */
+    .genre-filter-container {
+      position: absolute;
+      top: 80px;
+      left: 10px;
+      z-index: 1000;
+      width: 200px;
+    }
+
+    /* GENRE FILTER Button */
+    .genre-filter-btn {
+      width: 100%;
+      padding: 10px 20px; /* Adjusted padding to match "Open" button */
+      background: #7f7fff; /* Violet */
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em; /* Matching font size with "Open" button */
+      font-weight: bold; /* Bold text */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .genre-filter-btn:hover {
+      background: #8e2de2; /* Darker Violet */
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Arrow Styling */
+    .genre-filter-btn .arrow {
+      margin-top: 5px;
+      font-size: 1.2em;
+      transition: transform 0.3s;
+    }
+
+    .genre-filter-btn.active .arrow {
+      transform: rotate(180deg); /* Rotate arrow when active */
+    }
+
+    /* Genre List Panel */
+    .genre-list {
+      max-height: 0;
+      overflow: hidden;
+      background: #2c2c3e; /* Dark background */
+      border-radius: 8px;
+      transition: max-height 0.3s ease;
+      margin-top: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .genre-list.open {
+      max-height: 500px; /* Adjust as needed */
+    }
+
+    /* Genre Buttons */
+    .genre-list button {
+      width: 100%;
+      padding: 10px;
+      background: #000; /* Black background */
+      color: #fff;
+      border: none;
+      border-bottom: 1px solid #444;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.3s;
+      text-align: left;
+    }
+
+    .genre-list button:last-child {
+      border-bottom: none;
+    }
+
+    .genre-list button.selected {
+      background: #7f7fff; /* Violet when selected */
+    }
+
+    .genre-list button:hover {
+      background: #444;
+    }
+
+    /* Container for Logo and Open Button */
     .logo-container {
       position: absolute;
       top: 20px;
@@ -21,32 +106,51 @@
       transform: translateX(-50%);
       z-index: 1100;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .logo-container img {
       width: 250px;
+      margin-bottom: 10px;
+    }
+
+    /* Container for Open Button and Input Panel */
+    .apri-container {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: center;
     }
 
     .toggle-panel-btn {
-      display: block;
-      margin: 5px auto 0;
-      background: linear-gradient(45deg, #58a6ff, #7f7fff);
+      background: #7f7fff; /* Violet */
       color: #fff;
       border: none;
       padding: 10px 20px;
       font-weight: bold;
       cursor: pointer;
-      border-radius: 4px;
+      border-radius: 8px;
       text-transform: uppercase;
       font-size: 1em;
+      display: inline-block;
+      transition: background 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
+    .toggle-panel-btn:hover {
+      background: #8e2de2; /* Darker Violet */
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Input Panel */
     .overlay {
       position: absolute;
-      top: calc(100px + 50px);
+      top: 60px; /* Positioned just below the button */
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.9);
+      background: #2c2c3e; /* Dark background */
       color: #fff;
       padding: 20px;
       border-radius: 10px;
@@ -54,20 +158,89 @@
       z-index: 1100;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
       display: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .overlay h2 {
+      margin-top: 0;
+      text-align: center;
+      font-size: 1.5em;
+      color: #fff; /* White */
+    }
+
+    .form-group {
+      position: relative;
+      margin-bottom: 15px;
     }
 
     .form-group input {
       width: 100%;
       padding: 10px;
-      margin-bottom: 10px;
-      background: #2c2c3e;
+      background: #000; /* Black background */
       color: #fff;
       border: none;
       border-radius: 4px;
+      font-size: 1em;
+      transition: background 0.3s;
+    }
+
+    .form-group input:focus {
+      background: #333;
+      outline: none;
+    }
+
+    .suggestions {
+      background: #2c2c3e;
+      border: 1px solid #444;
+      border-radius: 4px;
+      max-height: 150px;
+      overflow-y: auto;
+      position: absolute;
+      width: calc(100% - 20px);
+      z-index: 1001;
+    }
+
+    .suggestions div {
+      padding: 8px;
+      cursor: pointer;
+      color: #fff;
+      transition: background 0.3s;
+    }
+
+    .suggestions div:hover {
+      background: #444;
+    }
+
+    /* Multiple Genre Buttons in Input Panel */
+    .genre-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .genre-button {
+      padding: 8px 12px;
+      background: #000; /* Black background */
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.3s;
+      flex: 1 1 45%;
+      text-align: center;
+    }
+
+    .genre-button.selected {
+      background: #7f7fff; /* Violet */
+    }
+
+    .genre-button:hover {
+      background: #444;
     }
 
     .add-button {
-      background: linear-gradient(45deg, #58a6ff, #7f7fff);
+      background: #7f7fff; /* Violet */
       color: #fff;
       padding: 10px;
       border: none;
@@ -75,67 +248,248 @@
       font-weight: bold;
       text-transform: uppercase;
       width: 100%;
-      border-radius: 4px;
+      border-radius: 8px;
+      transition: background 0.3s, box-shadow 0.3s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
+    .add-button:hover {
+      background: #8e2de2; /* Darker Violet */
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* User Popup */
     .popup-user {
+      position: relative;
       display: flex;
+      flex-direction: column;
       align-items: center;
       margin-bottom: 5px;
     }
 
-    .popup-user img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      margin-right: 10px;
+    .popup-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
     }
 
-    .delete-button {
-      background: #ff4d4d;
+    .popup-content img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .popup-content a {
+      color: #7f7fff; /* Violet */
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.3s;
+    }
+
+    .popup-content a:hover {
+      color: #8e2de2; /* Darker Violet */
+    }
+
+    .spotify-logo {
+      width: 25px; /* Uniform size with Modal */
+      height: 25px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .spotify-logo:hover {
+      transform: scale(1.1);
+    }
+
+    /* Specific for Spotify logo in popup */
+    .leaflet-popup-content .spotify-logo {
+      width: 20px; /* Reduced in popup */
+      height: 20px;
+    }
+
+    /* Modal Panel for User Details */
+    #userModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left:0;
+      width:100%;
+      height:100%;
+      background: rgba(0,0,0,0.5);
+      z-index:2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #userModalContent {
+      background: #2c2c3e;
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      width: 250px; /* Reduced from 300px */
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    #userModalContent h3 {
+      margin-top: 0;
+      color: #fff; /* White */
+      font-size: 1.2em;
+    }
+
+    #userModalContent button.close-modal {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    #userModalContent .genre-selection-modal {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+
+    #userModalContent .genre-selection-modal button {
+      padding: 5px 8px;
+      background: #000; /* Black background */
       color: #fff;
       border: none;
-      padding: 5px 8px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 0.8em;
-      margin-left: 10px;
+      transition: background 0.3s;
+      flex: 1 1 45%;
+      text-align: center;
     }
 
-    .popup-user a {
-      color: #58a6ff;
-      text-decoration: none;
-      font-weight: bold;
+    #userModalContent .genre-selection-modal button.selected {
+      background: #7f7fff; /* Violet */
     }
+
+    #userModalContent .genre-selection-modal button:hover {
+      background: #444;
+    }
+
+    #userModalContent .delete-button {
+      background: #ff4d4d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-top: 15px;
+      width: 100%;
+      transition: background 0.3s;
+    }
+
+    #userModalContent .delete-button:hover {
+      background: #ff1a1a;
+    }
+
+    /* Modern Scrollbar for Suggestions */
+    .suggestions::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .suggestions::-webkit-scrollbar-track {
+      background: #2c2c3e;
+      border-radius: 4px;
+    }
+
+    .suggestions::-webkit-scrollbar-thumb {
+      background: #7f7fff;
+      border-radius: 4px;
+    }
+
   </style>
 </head>
 <body>
-  <div id="map"></div>
-
-  <!-- Logo e Pulsante APRI -->
-  <div class="logo-container">
-    <img src="LOGO WHITE NO BACKGROUND.png" alt="Soundvertise Logo"/>
-    <button class="toggle-panel-btn" id="togglePanel">Apri</button>
+  <!-- Genre Filter Container -->
+  <div class="genre-filter-container">
+    <button class="genre-filter-btn" id="genreFilterBtn">
+      <span>GENRE FILTER</span>
+      <span class="arrow">&#9660;</span> <!-- Downward arrow -->
+    </button>
+    <div class="genre-list" id="genreList">
+      <button data-genre="ALL" class="selected">ALL</button>
+      <button data-genre="POP / COMMERCIAL">POP / COMMERCIAL</button>
+      <button data-genre="INDIE ACOUSTIC FOLK">INDIE ACOUSTIC FOLK</button>
+      <button data-genre="PIANO / CLASSICAL">PIANO / CLASSICAL</button>
+      <button data-genre="INSTRUMENTAL / AMBIENT">INSTRUMENTAL / AMBIENT</button>
+      <button data-genre="ELECTRONIC">ELECTRONIC</button>
+      <button data-genre="LOFI / JAZZ">LOFI / JAZZ</button>
+      <button data-genre="RAP / TRAP / HIPHOP">RAP / TRAP / HIPHOP</button>
+      <button data-genre="ROCK / METAL">ROCK / METAL</button>
+    </div>
   </div>
 
-  <!-- Pannello Input -->
-  <div class="overlay" id="panel">
-    <h2>Aggiungi Curatore</h2>
-    <div class="form-group">
-      <input type="text" id="spotifyLink" placeholder="Link Spotify Utente">
+  <div id="map"></div>
+
+  <!-- Logo and Open Button Container -->
+  <div class="logo-container">
+    <img src="LOGO WHITE NO BACKGROUND.png" alt="Soundvertise Logo"/>
+    <div class="apri-container">
+      <button class="toggle-panel-btn" id="togglePanel">Open</button>
+      <div class="overlay" id="panel">
+        <h2>Add Curator</h2>
+        <div class="form-group">
+          <input type="text" id="spotifyLink" placeholder="Spotify User Link">
+        </div>
+        <div class="form-group">
+          <input type="text" id="cityInput" placeholder="Type city name">
+          <div id="citySuggestions" class="suggestions"></div>
+        </div>
+        <div class="form-group">
+          <div class="genre-buttons" id="addGenreButtons">
+            <button class="genre-button" data-genre="POP / COMMERCIAL">POP / COMMERCIAL</button>
+            <button class="genre-button" data-genre="INDIE ACOUSTIC FOLK">INDIE ACOUSTIC FOLK</button>
+            <button class="genre-button" data-genre="PIANO / CLASSICAL">PIANO / CLASSICAL</button>
+            <button class="genre-button" data-genre="INSTRUMENTAL / AMBIENT">INSTRUMENTAL / AMBIENT</button>
+            <button class="genre-button" data-genre="ELECTRONIC">ELECTRONIC</button>
+            <button class="genre-button" data-genre="LOFI / JAZZ">LOFI / JAZZ</button>
+            <button class="genre-button" data-genre="RAP / TRAP / HIPHOP">RAP / TRAP / HIPHOP</button>
+            <button class="genre-button" data-genre="ROCK / METAL">ROCK / METAL</button>
+          </div>
+        </div>
+        <button class="add-button" id="addUserBtn">Add</button>
+      </div>
     </div>
-    <div class="form-group">
-      <input type="text" id="cityInput" placeholder="Digita il nome della città">
-      <div id="citySuggestions" class="suggestions"></div>
+  </div>
+
+  <!-- Modal Panel for User Details -->
+  <div id="userModal">
+    <div id="userModalContent">
+      <button class="close-modal">&times;</button>
+      <h3 id="modalUserName">Curator Details</h3>
+      <img id="modalUserImage" src="" alt="User Image" style="width:60px; height:60px; border-radius:50%; display: block; margin: 10px auto;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" alt="Spotify" class="spotify-logo">
+      <div class="genre-selection-modal" id="modalGenreButtons">
+        <!-- Dynamic Genres -->
+      </div>
+      <button class="delete-button" id="modalDeleteButton">Delete</button>
     </div>
-    <button class="add-button" id="addUserBtn">Aggiungi</button>
   </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database-compat.js"></script>
   <script>
-    // Firebase Configurazione
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAF1C0aWwy2sU3NQtW5jRFuEhmmxJhAric",
       authDomain: "soundvertise-world-map-7c33a.firebaseapp.com",
@@ -146,6 +500,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Initialize Map
     const map = L.map('map', {
       minZoom: 3,
       maxZoom: 18,
@@ -154,47 +509,259 @@
     }).setView([20, 10], 3);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    db.ref('markers').on('value', snapshot => {
-      map.eachLayer(layer => layer instanceof L.Marker && map.removeLayer(layer));
-      const groupedMarkers = {};
-      snapshot.forEach(child => {
-        const user = child.val();
-        const key = `${user.lat},${user.lng}`;
-        if (!groupedMarkers[key]) groupedMarkers[key] = [];
-        groupedMarkers[key].push({ ...user, id: child.key });
-      });
-      for (const [key, users] of Object.entries(groupedMarkers)) {
-        const [lat, lng] = key.split(',').map(Number);
-        const marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup(users.map(user => generatePopupContent(user)).join('<hr>'));
-        marker.on('mouseover', () => marker.openPopup());
-      }
+    // List of Musical Genres
+    const genresList = [
+      "POP / COMMERCIAL",
+      "INDIE ACOUSTIC FOLK",
+      "PIANO / CLASSICAL",
+      "INSTRUMENTAL / AMBIENT",
+      "ELECTRONIC",
+      "LOFI / JAZZ",
+      "RAP / TRAP / HIPHOP",
+      "ROCK / METAL"
+    ];
+
+    // Current Filter State
+    let currentFilter = 'ALL'; // Default to 'ALL'
+
+    // Genre Filter Button and List
+    const genreFilterBtn = document.getElementById('genreFilterBtn');
+    const genreList = document.getElementById('genreList');
+
+    genreFilterBtn.addEventListener('click', () => {
+      genreList.classList.toggle('open');
+      genreFilterBtn.classList.toggle('active');
     });
 
-    function generatePopupContent(user) {
-      return `
-        <div class="popup-user">
-          <img src="${user.image || 'https://via.placeholder.com/30'}" alt="${user.name}">
-          <a href="${user.link}" target="_blank">${user.name}</a>
-          <button class="delete-button" onclick="deleteUser('${user.id}')">Elimina</button>
-        </div>
-      `;
+    // Genre Filter Buttons in the Genre List
+    genreList.querySelectorAll('button').forEach(button => {
+      button.addEventListener('click', () => {
+        const selectedGenre = button.getAttribute('data-genre');
+
+        if (selectedGenre === 'ALL') {
+          // If 'ALL' is selected, deselect other genres
+          genreList.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('selected');
+          });
+          button.classList.add('selected');
+          currentFilter = 'ALL';
+        } else {
+          // If any other genre is selected, deselect 'ALL' and others
+          const allButton = genreList.querySelector('button[data-genre="ALL"]');
+          if (allButton.classList.contains('selected')) {
+            allButton.classList.remove('selected');
+          }
+
+          // Deselect other genres
+          genreList.querySelectorAll('button').forEach(btn => {
+            if (btn !== button && btn.getAttribute('data-genre') !== 'ALL') {
+              btn.classList.remove('selected');
+            }
+          });
+
+          // Select the clicked genre
+          button.classList.add('selected');
+          currentFilter = selectedGenre;
+        }
+
+        // Update markers based on the new filter
+        updateMarkers();
+
+        // The panel remains open, so no need to toggle 'open' class
+      });
+    });
+
+    // Function to Update Markers Based on Filter
+    function updateMarkers() {
+      db.ref('markers').once('value', snapshot => {
+        const users = snapshot.val();
+        if (!users) return;
+
+        // Group Users by Latitude and Longitude
+        const groupedUsers = {};
+        Object.keys(users).forEach(key => {
+          const user = users[key];
+          user.id = key; // Assign Firebase ID to user object
+
+          // Apply Filter
+          if (currentFilter === 'ALL' || (user.genres && user.genres.includes(currentFilter))) {
+            const latLngKey = `${user.lat},${user.lng}`;
+            if (!groupedUsers[latLngKey]) {
+              groupedUsers[latLngKey] = [];
+            }
+            groupedUsers[latLngKey].push(user);
+          }
+        });
+
+        // Remove Existing Markers
+        map.eachLayer(layer => {
+          if (layer instanceof L.Marker) {
+            map.removeLayer(layer);
+          }
+        });
+
+        // Create Marker for Each Group
+        Object.keys(groupedUsers).forEach(latLngKey => {
+          const [lat, lng] = latLngKey.split(',').map(Number);
+          const usersAtLocation = groupedUsers[latLngKey];
+
+          const marker = L.marker([lat, lng]).addTo(map);
+
+          // Bind Popup
+          marker.bindPopup(generateGroupedPopupContent(usersAtLocation));
+
+          // Events to Keep Popup Open
+          let popupOpen = false;
+
+          marker.on('mouseover', () => {
+            marker.openPopup();
+            popupOpen = true;
+          });
+
+          marker.on('mouseout', () => {
+            setTimeout(() => {
+              if (!popupOpen) {
+                marker.closePopup();
+              }
+            }, 200);
+          });
+
+          marker.on('popupopen', () => {
+            const popup = marker.getPopup();
+            const popupElement = popup.getElement();
+
+            // Add Event Listeners to Popup
+            popupElement.addEventListener('mouseenter', () => {
+              popupOpen = true;
+            });
+
+            popupElement.addEventListener('mouseleave', () => {
+              popupOpen = false;
+              marker.closePopup();
+            });
+          });
+        });
+      });
     }
 
-    function deleteUser(key) {
-      db.ref('markers/' + key).remove();
+    // Listener for Firebase Changes
+    db.ref('markers').on('value', snapshot => {
+      updateMarkers();
+    });
+
+    // Generate Popup Content for Grouped Users
+    function generateGroupedPopupContent(users) {
+      let content = '<div class="popup-user">';
+
+      users.forEach(user => {
+        content += `
+          <div class="popup-content">
+            <img src="${user.image || 'https://via.placeholder.com/40'}" alt="${user.name}">
+            <a href="#" onclick="openUserModal('${user.id}', event)">
+              ${user.name}
+              <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" alt="Spotify" class="spotify-logo" title="Open Spotify">
+            </a>
+          </div>
+        `;
+      });
+
+      content += '</div>';
+
+      return content;
     }
 
+    // Function to Delete a User
+    function deleteUser(key, event) {
+      event.stopPropagation(); // Prevents popup from closing
+      if (confirm("Are you sure you want to delete this user?")) {
+        db.ref('markers/' + key).remove();
+      }
+    }
+
+    // Function to Open User Modal
+    function openUserModal(userId, event) {
+      event.preventDefault(); // Prevent default link behavior
+      event.stopPropagation(); // Prevent event propagation
+
+      const modal = document.getElementById('userModal');
+      const modalUserName = document.getElementById('modalUserName');
+      const modalUserImage = document.getElementById('modalUserImage');
+      const modalGenreButtons = document.getElementById('modalGenreButtons');
+      const modalDeleteButton = document.getElementById('modalDeleteButton');
+
+      db.ref('markers/' + userId).once('value').then(snapshot => {
+        const user = snapshot.val();
+        if (!user) return;
+
+        // Populate Modal with User Data
+        modalUserName.textContent = user.name;
+        modalUserImage.src = user.image || 'https://via.placeholder.com/60';
+        modalDeleteButton.onclick = (evt) => deleteUser(userId, evt);
+
+        // Clear and Generate Genre Buttons
+        modalGenreButtons.innerHTML = '';
+        genresList.forEach(genre => {
+          const btn = document.createElement('button');
+          btn.textContent = genre;
+          btn.classList.add('genre-button-modal');
+          if (user.genres && user.genres.includes(genre)) {
+            btn.classList.add('selected');
+          }
+          btn.addEventListener('click', (evt) => toggleGenreModal(userId, genre, btn, evt));
+          modalGenreButtons.appendChild(btn);
+        });
+
+        // Configure Spotify Button
+        const spotifyLogo = modal.querySelector('.spotify-logo');
+        spotifyLogo.onclick = () => window.open(user.link, '_blank');
+
+        modal.style.display = 'flex';
+      });
+    }
+
+    // Function to Close Modal
+    function closeUserModal() {
+      const modal = document.getElementById('userModal');
+      modal.style.display = 'none';
+    }
+
+    // Function to Toggle Genre in Modal
+    function toggleGenreModal(userId, genre, button, event) {
+      event.stopPropagation(); // Prevents modal from closing
+
+      db.ref('markers/' + userId).once('value').then(snapshot => {
+        let user = snapshot.val();
+        if (!user.genres) user.genres = [];
+        if (user.genres.includes(genre)) {
+          user.genres = user.genres.filter(g => g !== genre);
+          button.classList.remove('selected');
+        } else {
+          user.genres.push(genre);
+          button.classList.add('selected');
+        }
+        db.ref('markers/' + userId).update({ genres: user.genres });
+      });
+    }
+
+    // Add New User
     document.getElementById('addUserBtn').addEventListener('click', async () => {
       const spotifyLink = document.getElementById('spotifyLink').value.trim();
       const city = document.getElementById('cityInput').value.trim();
+      const selectedGenres = Array.from(document.querySelectorAll('#addGenreButtons .genre-button.selected'))
+                                  .map(btn => btn.getAttribute('data-genre'));
 
-      if (!spotifyLink || !city) return alert("Inserisci dati validi");
+      if (!spotifyLink || !city || selectedGenres.length === 0) {
+        return; // Remove alert
+      }
 
-      const location = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${city}`)
+      const location = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`)
         .then(res => res.json()).then(data => data[0]);
 
+      if (!location) return; // Remove alert
+
       const userId = spotifyLink.split('/user/')[1]?.split('?')[0];
+      if (!userId) return; // Remove alert
+
       const token = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
@@ -204,6 +771,8 @@
         body: 'grant_type=client_credentials'
       }).then(res => res.json()).then(data => data.access_token);
 
+      if (!token) return; // Remove alert
+
       const spotifyUser = await fetch(`https://api.spotify.com/v1/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       }).then(res => res.json());
@@ -211,20 +780,93 @@
       const user = {
         lat: location.lat,
         lng: location.lon,
-        name: spotifyUser.display_name || "Curatore",
+        name: spotifyUser.display_name || "Curator",
         link: spotifyLink,
-        image: (spotifyUser.images?.[0]?.url) || ''
+        image: (spotifyUser.images?.[0]?.url) || '',
+        genres: selectedGenres
       };
 
-      db.ref('markers').push(user);
+      db.ref('markers').push(user).then(() => {
+        // Clear input fields
+        document.getElementById('spotifyLink').value = '';
+        document.getElementById('cityInput').value = '';
+        document.querySelectorAll('#addGenreButtons .genre-button').forEach(btn => btn.classList.remove('selected'));
+        // Optionally, you can display a success message here
+      }).catch(err => {
+        console.error(err);
+        // Optionally, handle the error here
+      });
     });
 
-    document.getElementById('togglePanel').addEventListener('click', () => {
+    // Toggle Input Panel "Open"
+    document.getElementById('togglePanel').addEventListener('click', (e) => {
       const panel = document.getElementById('panel');
       const btn = document.getElementById('togglePanel');
       panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-      btn.textContent = panel.style.display === 'block' ? 'Chiudi' : 'Apri';
+      btn.textContent = panel.style.display === 'block' ? 'Close' : 'Open';
+      e.stopPropagation(); // Prevents click from propagating
     });
+
+    // Toggle Genre Buttons in Input Panel
+    document.querySelectorAll('#addGenreButtons .genre-button').forEach(button => {
+      button.addEventListener('click', () => {
+        button.classList.toggle('selected');
+      });
+    });
+
+    // Autocomplete for City Selection
+    const cityInput = document.getElementById('cityInput');
+    const suggestionsBox = document.getElementById('citySuggestions');
+
+    cityInput.addEventListener('input', async () => {
+      const query = cityInput.value.trim();
+      if (query.length < 3) {
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.style.display = 'none';
+        return;
+      }
+      const results = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5`)
+        .then(res => res.json());
+      suggestionsBox.innerHTML = results.map(place => `<div data-name="${place.display_name}">${place.display_name}</div>`).join('');
+      suggestionsBox.style.display = results.length ? 'block' : 'none';
+    });
+
+    // Select a City from Suggestions
+    suggestionsBox.addEventListener('click', (e) => {
+      if (e.target && e.target.matches('div')) {
+        cityInput.value = e.target.getAttribute('data-name');
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.style.display = 'none';
+        e.stopPropagation(); // Prevents panel from closing
+      }
+    });
+
+    // Close Suggestions if Clicked Outside
+    document.addEventListener('click', (e) => {
+      if (!cityInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+        suggestionsBox.style.display = 'none';
+      }
+    });
+
+    // Close Input Panel if Clicked Outside
+    document.addEventListener('click', (e) => {
+      const panel = document.getElementById('panel');
+      const toggleBtn = document.getElementById('togglePanel');
+      if (!panel.contains(e.target) && !toggleBtn.contains(e.target)) {
+        panel.style.display = 'none';
+        toggleBtn.textContent = 'Open';
+      }
+    });
+
+    // Close Modal when Clicking Outside Content
+    document.getElementById('userModal').addEventListener('click', function(event) {
+      if (event.target === this) {
+        closeUserModal();
+      }
+    });
+
+    // Close Modal when Clicking Close Button
+    document.querySelector('#userModalContent .close-modal').addEventListener('click', closeUserModal);
   </script>
 </body>
 </html>
